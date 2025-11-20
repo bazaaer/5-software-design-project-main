@@ -44,3 +44,6 @@ replay_pid*
 **/.m2-autograder/
 .mvn
 
+# Database
+*.db
+*.trace.db
