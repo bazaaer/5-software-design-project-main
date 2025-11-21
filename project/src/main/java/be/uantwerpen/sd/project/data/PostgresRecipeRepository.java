@@ -8,7 +8,7 @@ public class PostgresRecipeRepository implements RecipeRepository {
     @Override
     public void save(Recipe recipe) {
         System.out.println("[Postgres] Saving recipe: " + recipe.getTitle());
-        // Real Postgres JDBC code would go here
+        // TODO: add the actual logic
     }
 
     @Override

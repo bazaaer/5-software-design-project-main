@@ -8,7 +8,7 @@ public class H2RecipeRepository implements RecipeRepository {
     @Override
     public void save(Recipe recipe) {
         System.out.println("[H2] Saving recipe: " + recipe.getTitle());
-        // Real H2 JDBC code would go here
+        // TODO: add the code for actually saving the recepe
     }
 
     @Override
