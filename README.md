@@ -1,324 +1,370 @@
-# 5–Software Design — Project
+# Smart Meal Planner & Boodschappenlijst
 
-Welcome! This repository contains the **starter setup** for the *5–Software Design* **project**.
+Dit repository bevat **ons project** voor het vak **5–Software Design** aan de Universiteit Antwerpen:  
+een **Smart Meal Planner & Boodschappenlijst Generator**.
 
-You will work in **teams of 2 students** on **one** of the three project options described below. The non‑functional
-requirements (design patterns, UML, tests, …) are **identical for all options**.
-
-The powerpoint and BB are always right. If the readme differs from them, follow the PowerPoint.
-
----
-
-## Project Overview
-
-* Choose **exactly one** of the following:
-
-    * **Option 1:** Smart Meal Planner & Grocery List Generator
-    * **Option 2:** Board Game Tournament Manager
-    * **Option 3:** Travel Planner & Trip Overview Manager
-* Groups of **2 students**.
-* When you have problems working in a team, contact the lecturer as soon as possible.
-* Use everything you have learned during the labs (UML, design patterns, testing).
-
-> Deadlines, submission details and the group registration form are announced on Blackboard.
+De applicatie helpt gebruikers om:
+- recepten te beheren,
+- een weekmenu op te stellen,
+- automatisch een boodschappenlijst te genereren op basis van dat menu.
 
 ---
 
-## Non‑Functional Requirements (same for all project options)
+## Inhoudstafel
+
+- [1. Inleiding](#1-inleiding)
+- [2. Projectoverzicht](#2-projectoverzicht)
+  - [2.1 Doel](#21-doel)
+  - [2.2 Team](#22-team)
+- [3. Functionaliteiten](#3-functionaliteiten)
+  - [3.1 Recepten beheren](#31-recepten-beheren)
+  - [3.2 Weekplanning](#32-weekplanning)
+  - [3.3 Automatische boodschappenlijst](#33-automatische-boodschappenlijst)
+  - [3.4 Optionele / extra features](#34-optionele--extra-features)
+- [4. Architectuur & Design Patterns](#4-architectuur--design-patterns)
+- [5. UML & Documentatie](#5-uml--documentatie)
+- [6. Tests](#6-tests)
+- [7. Technologie & Uitvoering](#7-technologie--uitvoering)
+- [8. Git Workflow](#8-git-workflow)
+- [9. AI-gebruik](#9-ai-gebruik)
+- [10. TODO-lijst](#10-todo-lijst)
+- [11. Credits](#11-credits)
+
+---
+
+## 1. Inleiding
+
+Dit document beschrijft **ons concrete project**, gebaseerd op de optie  
+**“Smart Meal Planner & Grocery List Generator”** uit het vak *5–Software Design*.
+
+In plaats van de algemene opdrachtfocus, beschrijft deze README:
+- wat **wij** precies bouwen,
+- hoe de applicatie is opgebouwd,
+- welke design patterns, UML-diagrammen en tests we voorzien.
+
+Voor algemene richtlijnen (deadlines, puntenverdeling, …) verwijzen we naar:
+- de **PowerPoint** van het vak (op Blackboard),
+- de **Blackboard-cursuspagina**: <https://blackboard.uantwerpen.be>
+
+---
+
+## 2. Projectoverzicht
+
+### 2.1 Doel
+
+Het doel van onze Smart Meal Planner is om:
+
+- het plannen van maaltijden voor een volledige week eenvoudiger te maken,
+- recepten en ingrediënten centraal te beheren,
+- automatisch een boodschappenlijst te genereren zodat je niets vergeet,
+- een duidelijke en onderhoudbare codebasis te maken met correcte design patterns.
+
+De nadruk ligt zowel op **functionaliteit** als op **software-ontwerp** (patterns, UML, tests).
+
+### 2.2 Team
+
+- Student 1: _\<Naam + r-nummer\>_  
+- Student 2: _\<Naam + r-nummer\>_  
+
+Vak: **5–Software Design** – FTI, Universiteit Antwerpen  
+Academiejaar: **2024–2025**
+
+---
+
+## 3. Functionaliteiten
+
+### 3.1 Recepten beheren
+
+De applicatie laat de gebruiker een persoonlijke **receptenbibliotheek** beheren.
+
+Elke **recept** bevat minstens:
+
+- Titel  
+- Beschrijving  
+- Lijst van ingrediënten (met **hoeveelheid** en **eenheid**)  
+- Optionele tags (bv. `vegetarisch`, `snel`, `budget`)  
+- (Optioneel) aantal porties, bereidingstijd, moeilijkheidsgraad, …
+
+De gebruiker kan:
+
+- recepten **toevoegen**,  
+- recepten **bekijken** (detailweergave),  
+- recepten **bewerken**,  
+- recepten **verwijderen**,  
+- (optioneel) zoeken/filteren op titel, ingrediënt of tag.
+
+### 3.2 Weekplanning
+
+De app ondersteunt een **weekmenu van 7 dagen** (maandag t.e.m. zondag).
+
+Per dag voorzien we standaard de volgende maaltijd-slots:
+
+- Ontbijt  
+- Lunch  
+- Avondmaal  
+- Snacks  
+
+De gebruiker kan:
+
+- per dag en per slot een recept **inplannen**,  
+- de volledige **weekplanning bekijken**,  
+- geplande recepten **wijzigen of verwijderen**,  
+- (optioneel) zelf maaltijd-slots configureren (slots toevoegen/verwijderen).
+
+### 3.3 Automatische boodschappenlijst
+
+Op basis van de **huidige weekplanning** genereert de applicatie een **boodschappenlijst**:
+
+- alle ingrediënten van alle ingeplande recepten worden samengevoegd;
+- hoeveelheden per ingrediënt worden **opgeteld**  
+  - voorbeeld: 2× `100 g pasta` → `200 g pasta`.
+
+De boodschappenlijst wordt **automatisch herberekend** wanneer de planning wijzigt.
+
+In deze lijst kan de gebruiker:
+
+- items **afvinken** als “gekocht”,  
+- extra ad-hoc items **handmatig toevoegen** (bv. wc-papier, drank, …),  
+- (optioneel) items laten **groeperen per categorie** (groenten, zuivel, droge voeding, …).
+
+### 3.4 Optionele / extra features
+
+Afhankelijk van de beschikbare tijd kunnen we volgende extra functies toevoegen:
+
+- **Persistentie**: recepten, weekplannen en boodschappenlijst opslaan in een bestand of database;  
+- **Dieetvoorkeuren**: bv. vegetarisch, vegan, glutenvrij, en visuele aanduiding in de planner;  
+- **Statistieken**: meest gebruikte recepten, meest gebruikte ingrediënten, …;  
+- **Template-weken**: favoriete weekplanningen bewaren en opnieuw inladen.
+
+---
+
+## 4. Architectuur & Design Patterns
+
+We ontwerpen de applicatie expliciet rond een aantal design patterns, in lijn met de opdrachteisen.
+
+### MVC
+
+We gebruiken **Model–View–Controller (MVC)** als globale architectuur:
+
+- **Model**  
+  - domeinklassen zoals `Recipe`, `Ingredient`, `MealSlot`, `MealPlan`, `GroceryList`, …
+- **View**  
+  - GUI-componenten voor receptenbeheer, weekplanning en boodschappenlijstweergave
+- **Controller**  
+  - vangt gebruikersacties op, stuurt de modellen aan en laat de views hertekenen
+
+### Verplichte patterns
+
+We implementeren minstens de volgende patronen:
+
+- **Singleton (thread-safe)**  
+  - bv. voor een centrale `AppConfig`, `RecipeRepository` of `DataStore`.
+
+- **Observer**  
+  - gebruikt in het domein, bv. een `MealPlan` of `RecipeRepository` dat observers verwittigt wanneer data wijzigt,  
+    zodat de boodschappenlijst en/of views automatisch kunnen updaten.  
+  - Dit staat **los van** eventuele Observer-mechanismen die in de MVC/GUI zitten.
+
+- **Één creational pattern** (Factory Method, Abstract Factory of Builder)  
+  - bv. een **Builder** voor complexe `Recipe`-objecten,  
+  - of een **Factory** voor standaard weekplanningen of meal slots.
+
+### Extra patroon
+
+Daarnaast implementeren we **minstens één extra patroon** dat logisch past in het domein, bijvoorbeeld:
+
+- **Strategy** – verschillende strategieën om een boodschappenlijst te genereren (per winkel, per categorie, per prijs, …);
+- **Decorator** – dynamisch extra eigenschappen toevoegen aan recepten of boodschappenlijst-items;
+- **Command** – acties zoals “recept inplannen”/“planning wijzigen” met undo/redo;
+- andere (Adapter, Façade, Proxy, Composite, State) indien gemotiveerd.
+
+Welke patronen effectief gebruikt worden, lichten we toe in de documentatie en UML.
+
+---
+
+## 5. UML & Documentatie
+
+We voorzien volgende UML-diagrammen:
+
+1. **Globaal klassendiagram** van de hele applicatie  
+   - de GUI kan eventueel als één klasse `GUI`/`View` voorgesteld worden.
+
+2. **Mini-klassendiagram per design pattern**  
+   - toont enkel de klassen en relaties die het patroon vormen.
+
+3. **Use case diagram**  
+   - met de belangrijkste actor(en) (gebruiker)  
+   - en de belangrijkste use cases (recepten beheren, weekplan maken, boodschappenlijst genereren, …).
+
+4. **Minstens één sequentiediagram**  
+   - bv. voor “Boodschappenlijst genereren op basis van weekplan”  
+   - of “Recept inplannen voor een bepaalde dag/maaltijd-slot”.
+
+We proberen UML als een **levende blauwdruk** te gebruiken: bij wijzigingen in het ontwerp passen we de diagrammen aan.
+
+---
+
+## 6. Tests
+
+We voorzien zowel **unit tests** als **integratietests**.
+
+### Unit tests
+
+- Minstens één **belangrijke klasse** (bv. `GroceryListService`, `MealPlan`, `RecipeRepository`, …) krijgt uitgebreide unit tests.
+- We testen o.a.:
+  - correcte optelling van ingrediënten,
+  - gedrag bij lege weekplanning,
+  - dubbele ingrediënten,
+  - foutieve invoer of randgevallen.
+
+### Integratietest(en)
+
+- Minstens één **integratietest** die een realistische use case doorloopt, bijvoorbeeld:
+  - aanmaken van recepten → opstellen weekplan → genereren boodschappenlijst.
+- Deze test gebruikt minstens controller + model (en eventueel een eenvoudige view-abstractie).
+
+---
+
+## 7. Technologie & Uitvoering
+
+> Dit gedeelte passen we aan zodra het project volledig is opgezet.
+
+- Programmeertaal: **Java**  
+- Build-tool: **Maven** of **Gradle** (in lijn met de labs)  
+- Java-versie: **17** (of wat het vak voorschrijft)
+
+### 7.1 Project bouwen en starten
+
+Voorbeeld met Maven:
+
+```bash
+# Repository clonen
+git clone <REPO-URL>
+cd <PROJECT-FOLDER>
+
+# Bouwen
+mvn clean install
+
+# Applicatie runnen (pas aan volgens de echte main-class)
+mvn exec:java
+```
+
+Nuttige links:
+
+- Git: <https://git-scm.com/>  
+- Git-inleiding (video): <https://www.youtube.com/watch?v=SWYqp7iY_Tc>  
+- Java API-documentatie: <https://docs.oracle.com/en/java/javase/17/docs/api/>
+
+---
+
+## 8. Git Workflow
+
+We gebruiken **Git** om samen te werken en wijzigingsgeschiedenis bij te houden.
+
+Afspraken (voorstel):
+
+- werken op **feature branches** voor nieuwe functionaliteit,
+- duidelijke, betekenisvolle commit messages,
+- regelmatig mergerequests of pull requests (indien GitHub/GitLab),
+- main/master blijft in principe **compileerbaar** en **testbaar**.
+
+Enkele handige Git-commando’s:
+
+```bash
+# Nieuwe branch maken
+git checkout -b feature/nieuwe-functionaliteit
+
+# Wijzigingen toevoegen en committen
+git add .
+git commit -m "Beschrijf kort maar duidelijk wat er is veranderd"
+
+# Branch pushen
+git push origin feature/nieuwe-functionaliteit
+```
+
+Meer info: <https://git-scm.com/doc>
+
+---
+
+## 9. AI-gebruik
+
+Volgens de richtlijnen van het vak mogen we **generatieve AI** gebruiken, met beperkingen:
+
+- AI gebruiken we enkel om:
+  - syntax en tooling beter te begrijpen,
+  - design patterns en architectuurbeslissingen te verkennen,
+  - foutmeldingen of bugs te analyseren.
+- Alle **definitieve code en UML** moeten we zelf begrijpen en kunnen uitleggen.
+- We houden een **kort logboek** bij met:
+  - wanneer AI gebruikt werd,
+  - voor welk probleem,
+  - en hoe we de output hebben aangepast of verbeterd.
+
+---
+
+## 10. TODO-lijst
+
+Hieronder houden we bij wat er nog moet gebeuren.  
+Dit is een **interne planning** voor ons team.
+
+### Algemeen
+
+- [ ] README aanvullen met echte namen, r-nummers en repo-URL
+- [ ] Basisproject opzetten (package-structuur, main-class, build-tool configureren)
+- [ ] Mapstructuur afstemmen op labs (src/main/java, src/test/java, …)
+
+### Domein & logica
+
+- [ ] Domeinmodel uitwerken (`Recipe`, `Ingredient`, `MealPlan`, `MealSlot`, `GroceryList`, …)
+- [ ] Eerste versie `RecipeRepository` + persistentiestrategie kiezen
+- [ ] Logica voor genereren van boodschappenlijst implementeren
+- [ ] Observer-koppeling tussen planning en boodschappenlijst uitwerken
 
 ### Design patterns
 
-The following design patterns are **mandatory** to implement:
+- [ ] Singleton-klasse kiezen en implementeren (bv. config of datastore)
+- [ ] Observer-interface en concrete observers implementeren
+- [ ] Creational pattern (Factory/Builder/Abstract Factory) ontwerpen en toevoegen
+- [ ] Extra patroon (bv. Strategy of Command) kiezen en integreren
 
-* **MVC**
-* **Singleton** (thread‑safe)
-* **Observer**
-  (the Observer aspect inherent in MVC **does not** count for this)
-* **One of** the following creational patterns:
+### GUI
 
-    * Factory Method
-    * Abstract Factory
-    * Builder
+- [ ] Basis-GUI opzetten (receptenoverzicht, weekplanning, boodschappenlijst)
+- [ ] MVC-structuur doorvoeren in code (Model, View, Controller)
+- [ ] Use case “recept toevoegen” volledig werkend maken
+- [ ] Use case “weekplan opstellen + boodschappenlijst genereren” volledig werkend maken
 
-In addition, you must implement **at least one** of the following patterns:
+### UML & documentatie
 
-* Strategy
-* Decorator
-* Command
-* Adapter
-* Façade
-* Proxy
-* Composite
-* State
-
-> Every design pattern should be implemented where it **fits the domain** and is **logically motivated** —
-> do not add patterns just to tick a box.
-
-### UML diagrams
-
-You must deliver the following UML diagrams for your chosen project:
-
-* **Class diagrams**
-
-    * **One class diagram of the whole application.**
-      (The GUI can be abstracted to a single `GUI` or `View` class.)
-    * **One mini class diagram for each design pattern** you implement.
-      Each mini diagram should show only the classes and relationships that form the pattern.
-* **Use case diagram** of the entire application
-
-    * Show the **important actors**.
-    * Include all **main use cases** corresponding to the functional requirements.
-* **Sequence diagram**
-
-    * At least **one sequence diagram** for a key use case in your application.
+- [ ] Globaal klassendiagram opstellen
+- [ ] Mini-klassendiagrammen per pattern maken
+- [ ] Use case diagram tekenen
+- [ ] Minstens één sequentiediagram uitwerken
+- [ ] UML updaten bij belangrijke ontwerpwijzigingen
 
 ### Tests
 
-* **Unit tests**
-
-    * Full unit test coverage for **at least one important class**.
-* **Integration tests**
-
-    * At least **one integration test** that exercises a realistic use case (e.g. via controller + model).
-
-> Tip: Create the UML first and keep it as a **live updated blueprint**.
->
-> Tip: Write tests **as you go**, not only at the end.
+- [ ] Unit tests schrijven voor belangrijkste domeinklassen
+- [ ] Integratietest opzetten voor realistische use case
+- [ ] Testcoverage nakijken en waar nodig uitbreiden
 
 ---
 
-## Functional Requirements
+## 11. Credits
 
-Below you find the functional requirements for each project option
+Indien we code of ideeën hergebruiken van externe bronnen, vermelden we die hier.
 
----
+Voorbeelden:
 
-## Option 1 – Smart Meal Planner & Grocery List Generator
+- StackOverflow antwoorden over specifieke Java-problemen  
+- Officiële documentatie (Java, JUnit, Maven, …)  
+- Tutorials of YouTube-video’s over design patterns of Java GUI
 
-### Manage recipes
+Formaat (voorbeeld):
 
-* Each recipe has at least:
-
-    * **Title**
-    * **Description**
-    * **Ingredient list**
-    * **Optional tags** (e.g. *vegetarian*, *quick*, *budget*)
-    * … (you may add more fields)
-* The user can:
-
-    * **Add** recipes
-    * **View** recipes
-    * **Edit** recipes
-    * **Remove** recipes
-
-### Manage weekly meal plan
-
-* **7 days** (Mon – Sun)
-* Per day, at least the following meal slots:
-
-    * Breakfast
-    * Lunch
-    * Dinner
-    * Snacks
-    * Optional: let the user **configure** which meal slots exist
-* The user can:
-
-    * **Choose recipes for each day**
-    * **View the plan**
-    * **Change or remove** the planned recipe for a day
-
-### Generate grocery list
-
-* Based on the **current weekly meal plan**:
-
-    * All ingredients from the planned recipes are collected.
-    * **Quantities per ingredient are summed**
-      (e.g. 2× `100 g pasta` → `200 g pasta`).
-* The grocery list is **automatically generated and updated** when the plan changes.
-* In the grocery list, the user can:
-
-    * **Check off items** as bought
-    * **Add extra items** manually
-
-### Optional
-
-* Actual **data persistence** across sessions (use a file or database).
-* You are allowed to **add custom features**.
+- “Opzet Builder pattern geïnspireerd door voorbeeld uit \<link>”  
+- “Git branching strategie gebaseerd op blogpost \<link>”
 
 ---
 
-## Option 2 – Board Game Tournament Manager
-
-### Manage players
-
-* Each player has at least:
-
-    * **Name**
-    * **Skill level / rating**
-    * **Description**
-    * **Age**
-    * … (you may add more fields)
-* The user can:
-
-    * **Add** players
-    * **View** players
-    * **Edit** players
-    * **Remove** players
-
-### Manage game types
-
-* Each game type has at least:
-
-    * **Name**
-    * **Min/Max number of players per match**
-    * **Scoring rule (points)**
-    * **Description**
-    * **Variant**
-    * … (you may add more fields)
-* There must be **at least a few predefined game types**, e.g.:
-
-    * Java, Catan, Carcassonne, Chess, …
-* The user can:
-
-    * **Select**, **edit**, **create**, **view** and **delete** game types
-
-### Create and manage tournaments
-
-* A tournament has at least:
-
-    * **Chosen game type**
-    * **Number of rounds**
-    * **List of registered players**
-    * **Day of tournament**
-    * **Description**
-    * … (you may add more fields)
-* The user can:
-
-    * **Create**, **edit**, **delete**, **view** tournaments
-    * **Add players** to a tournament
-    * **View basic information** of a tournament
-
-### Rounds, matches, and standings
-
-* The user can:
-
-    * **Generate pairings for each round**
-      (the pairing strategy can be chosen by you)
-    * View the **list of matches** for that round
-    * Enter a **result for each match** (e.g. winner, draw, …)
-    * **View results per round**
-* The system must:
-
-    * **Automatically calculate total points per player**
-    * At the end of the tournament, show:
-
-        * An **overall ranking**
-        * **Intermediate standings** for each round
-
-### Optional
-
-* Actual **data persistence** across sessions (use a file or database).
-* You are allowed to **add custom features**.
-
----
-
-## Option 3 – Travel Planner & Trip Overview Manager
-
-### Manage trips
-
-* Each trip has at least:
-
-    * **Title**
-    * **Destination**
-    * **Start/End date**
-    * **Description**
-    * … (you may add more fields)
-* The user can:
-
-    * **Create** trips
-    * **View** trips
-    * **Edit** trips
-    * **Delete** trips
-
-### Manage travellers / participants
-
-* Each traveller has at least:
-
-    * **Name**
-    * **Contact info**
-    * **Age**
-    * **Nationality / passport info**
-    * … (you may add more fields)
-* The user can:
-
-    * **Create**, **view**, **edit**, **delete** travellers
-    * **Assign travellers** to one or more trips
-    * **Edit travellers from a trip**
-    * **Remove travellers from a trip**
-    * **View travellers** participating in a certain trip
-
-### Manage itinerary (schedule) per trip
-
-* For each trip, you manage **itinerary items**. Each item has at least:
-
-    * **Title**
-    * **Date/time**
-    * **Type** (transport, accommodation, activity, …)
-    * **Optional location**
-    * **Description**
-    * **Price**
-    * … (you may add more fields)
-* The user can:
-
-    * **Create**, **view**, **edit**, **delete** itinerary items for each trip
-    * View a **day overview** for each day of the trip
-* The system must:
-
-    * **Automatically calculate / adjust the total price** for each trip
-
-### Optional
-
-* Actual **data persistence** across sessions (use a file or database).
-* You are allowed to **add custom features** (e.g. packing list).
-
----
-
-## Execution, Code Reuse & Tools
-
-### Groups
-
-* Work in **groups of 2 students**.
-* Fill in the Blackboard form with the name of your teammate before the deadline announced in class / on Blackboard.
-
-### Using code or diagrams of others
-
-* **From fellow students:** discouraged
-
-    * You will only be graded on what is **yours**, not on what is written by others.
-    * Copying code or diagrams from other groups is considered **plagiarism**.
-* **From the internet:**
-
-    * You *may* reuse code or ideas, but **give credit**.
-    * Add a short credits section (websites, names, YouTube links, StackOverflow, …) if you reuse external material.
-
-### Git & GitHub
-
-* Try to use **Git** and optionally **GitHub**.
-* Git is ideal for group projects, with features such as branching and committing.
-* It is also for your **own safety** (backup, history).
-* If you have never used Git before, you can start with an introductory video, e.g.:
-
-    * [https://www.youtube.com/watch?v=SWYqp7iY_Tc](https://www.youtube.com/watch?v=SWYqp7iY_Tc)
-
-### AI usage
-
-* You are allowed to use **generative AI**, but:
-
-    * You must keep a **logbook** describing **why, when, and where** you used AI.
-    * AI may only be used to deepen your understanding of design patterns and to assist in debugging.
-    * You must fully **understand all code and diagrams** you submit.
-* **Warning:** AI can hallucinate and be wrong. Always be critical and never blindly copy/paste the output.
-
----
-
-Good luck, and have fun designing and implementing your project!
+_Einde van README – versie 1 (NL, project-specifiek)._  
