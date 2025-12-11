@@ -1,8 +1,9 @@
 package be.uantwerpen.sd.project;
 
-import be.uantwerpen.sd.project.data.RecipeRepository;
-import be.uantwerpen.sd.project.data.StorageFactory;
-import be.uantwerpen.sd.project.model.Recipe;
+import be.uantwerpen.sd.project.storage.RecipeRepository;
+import be.uantwerpen.sd.project.storage.StorageFactory;
+import be.uantwerpen.sd.project.data.Recipe;
+import java.util.ArrayList;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -23,7 +24,8 @@ public class StorageFactoryITest {
         System.out.println("Repository Type: " + repo.getClass().getSimpleName());
 
         // 3. Use the repository (The Client Code)
-        Recipe recipe = new Recipe("Spaghetti Bolognese");
+        Recipe recipe = new Recipe("Spaghetti Bolognese", "A classic Italian dish.", new ArrayList<>(),
+                new ArrayList<>());
         assertDoesNotThrow(() -> repo.save(recipe), "Repository should save recipe without exception");
     }
 }

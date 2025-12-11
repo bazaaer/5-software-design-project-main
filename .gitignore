@@ -47,3 +47,4 @@ replay_pid*
 # Database
 *.db
 *.trace.db
+uml_diagram.md

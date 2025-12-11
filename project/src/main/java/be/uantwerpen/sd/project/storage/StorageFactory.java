@@ -1,7 +1,9 @@
-package be.uantwerpen.sd.project.data;
+package be.uantwerpen.sd.project.storage;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import be.uantwerpen.sd.project.storage.h2.H2StorageFactory;
+import be.uantwerpen.sd.project.storage.postgres.PostgresStorageFactory;
 
 public abstract class StorageFactory {
 
@@ -11,9 +13,9 @@ public abstract class StorageFactory {
     public static StorageFactory getInstance() {
         if (instance == null) {
             if (isPostgresAvailable()) {
-                instance = new PostgresStorageFactory();
+                instance = PostgresStorageFactory.getInstance();
             } else {
-                instance = new H2StorageFactory();
+                instance = H2StorageFactory.getInstance();
             }
         }
         return instance;
@@ -24,14 +26,16 @@ public abstract class StorageFactory {
         try {
             // Try to connect with a short timeout
             DriverManager.getConnection("jdbc:postgresql://localhost:5432/mealplanner", "student", "password");
-            System.out.println("StorageFactory: Postgres detected!");
             return true;
         } catch (SQLException e) {
-            System.out.println("StorageFactory: Postgres not found, falling back to H2.");
             return false;
         }
     }
 
     // The Abstract Method (What we produce)
     public abstract RecipeRepository getRecipeRepository();
+
+    public abstract IngredientRepository getIngredientRepository();
+
+    public abstract MealPlanRepository getMealPlanRepository();
 }
