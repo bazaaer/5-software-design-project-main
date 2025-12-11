@@ -42,10 +42,6 @@ In plaats van de algemene opdrachtfocus, beschrijft deze README:
 - hoe de applicatie is opgebouwd,
 - welke design patterns, UML-diagrammen en tests we voorzien.
 
-Voor algemene richtlijnen (deadlines, puntenverdeling, …) verwijzen we naar:
-- de **PowerPoint** van het vak (op Blackboard),
-- de **Blackboard-cursuspagina**: <https://blackboard.uantwerpen.be>
-
 ---
 
 ## 2. Projectoverzicht
@@ -67,7 +63,7 @@ De nadruk ligt zowel op **functionaliteit** als op **software-ontwerp** (pattern
 - Student 2: _\<Naam + r-nummer\>_  
 
 Vak: **5–Software Design** – FTI, Universiteit Antwerpen  
-Academiejaar: **2024–2025**
+Academiejaar: **2025–2026**
 
 ---
 
