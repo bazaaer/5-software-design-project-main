@@ -1,9 +1,9 @@
-package be.uantwerpen.sd.project.storage;
+package be.uantwerpen.sd.project.model.storage;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import be.uantwerpen.sd.project.storage.h2.H2StorageFactory;
-import be.uantwerpen.sd.project.storage.postgres.PostgresStorageFactory;
+import be.uantwerpen.sd.project.model.storage.h2.H2StorageFactory;
+import be.uantwerpen.sd.project.model.storage.postgres.PostgresStorageFactory;
 
 public abstract class StorageFactory {
 

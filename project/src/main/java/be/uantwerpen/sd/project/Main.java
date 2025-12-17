@@ -1,12 +1,13 @@
 package be.uantwerpen.sd.project;
 
 import be.uantwerpen.sd.project.controller.MealPlannerController;
-import be.uantwerpen.sd.project.data.Ingredient;
-import be.uantwerpen.sd.project.data.MealPlan;
-import be.uantwerpen.sd.project.data.Recipe;
-import be.uantwerpen.sd.project.storage.StorageFactory;
+import be.uantwerpen.sd.project.model.Ingredient;
+import be.uantwerpen.sd.project.model.MealPlan;
+import be.uantwerpen.sd.project.model.Recipe;
+import be.uantwerpen.sd.project.model.storage.StorageFactory;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -46,21 +47,36 @@ public class Main {
         // 5. Create and Save a MealPlan
         System.out.println("\n--- Adding Meal Plan ---");
         java.time.LocalDate today = java.time.LocalDate.now();
-        if (controller.getMealPlan(today).isEmpty()) {
-            MealPlan plan = new MealPlan(today, recipes);
+        java.util.Optional<MealPlan> existingPlan = controller.getMealPlan(today);
+
+        if (existingPlan.isEmpty()) {
+            Map<be.uantwerpen.sd.project.model.MealType, List<Recipe>> meals = new java.util.HashMap<>();
+            meals.put(be.uantwerpen.sd.project.model.MealType.DINNER, recipes);
+
+            MealPlan plan = new MealPlan(today, meals);
             controller.addMealPlan(plan);
             System.out.println("Added new meal plan for " + today);
         } else {
-            System.out.println("Meal plan for " + today + " already exists.");
+            System.out.println("Meal plan for " + today + " already exists:");
+            MealPlan p = existingPlan.get();
+            for (Map.Entry<be.uantwerpen.sd.project.model.MealType, List<Recipe>> entry : p.meals().entrySet()) {
+                System.out.println("  " + entry.getKey() + ":");
+                for (Recipe r : entry.getValue()) {
+                    System.out.println("    - " + r.title());
+                }
+            }
         }
 
         // 6. List all Meal Plans
         System.out.println("\n--- All Meal Plans ---");
-        List<MealPlan> plans = controller.getAllMealPlans(); // And this one
+        List<MealPlan> plans = controller.getAllMealPlans();
         for (MealPlan p : plans) {
             System.out.println("Meal Plan for: " + p.date());
-            for (Recipe r : p.recipes()) {
-                System.out.println("  - " + r.title());
+            for (Map.Entry<be.uantwerpen.sd.project.model.MealType, List<Recipe>> entry : p.meals().entrySet()) {
+                System.out.println("  " + entry.getKey() + ":");
+                for (Recipe r : entry.getValue()) {
+                    System.out.println("    - " + r.title());
+                }
             }
         }
     }

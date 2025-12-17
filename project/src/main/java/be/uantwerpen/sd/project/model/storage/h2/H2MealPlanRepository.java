@@ -1,12 +1,13 @@
-package be.uantwerpen.sd.project.storage.h2;
+package be.uantwerpen.sd.project.model.storage.h2;
 
-import be.uantwerpen.sd.project.storage.MealPlanRepository;
+import be.uantwerpen.sd.project.model.storage.MealPlanRepository;
 
-import be.uantwerpen.sd.project.data.MealPlan;
+import be.uantwerpen.sd.project.model.MealPlan;
 import java.sql.Connection;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class H2MealPlanRepository implements MealPlanRepository {
@@ -36,19 +37,24 @@ public class H2MealPlanRepository implements MealPlanRepository {
             }
 
             if (planId != -1) {
-                // 2. Save Recipe Links
-                String linkSql = "INSERT INTO meal_plan_recipes (meal_plan_id, recipe_id) VALUES (?, ?)";
+                // 2. Save Recipe Links with MealType
+                String linkSql = "INSERT INTO meal_plan_recipes (meal_plan_id, recipe_id, meal_type) VALUES (?, ?, ?)";
                 try (java.sql.PreparedStatement linkStmt = connection.prepareStatement(linkSql)) {
-                    for (be.uantwerpen.sd.project.data.Recipe recipe : plan.recipes()) {
-                        if (recipe.id() != null) {
-                            linkStmt.setLong(1, planId);
-                            linkStmt.setLong(2, recipe.id());
-                            linkStmt.addBatch();
+                    for (Map.Entry<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> entry : plan
+                            .meals().entrySet()) {
+                        be.uantwerpen.sd.project.model.MealType type = entry.getKey();
+                        for (be.uantwerpen.sd.project.model.Recipe recipe : entry.getValue()) {
+                            if (recipe.id() != null) {
+                                linkStmt.setLong(1, planId);
+                                linkStmt.setLong(2, recipe.id());
+                                linkStmt.setString(3, type.name());
+                                linkStmt.addBatch();
+                            }
                         }
                     }
                     linkStmt.executeBatch();
                 }
-                return new MealPlan(planId, plan.date(), plan.recipes());
+                return new MealPlan(planId, plan.date(), plan.meals());
             }
 
         } catch (java.sql.SQLException e) {
@@ -66,8 +72,9 @@ public class H2MealPlanRepository implements MealPlanRepository {
                 try (java.sql.ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         long id = rs.getLong("id");
-                        List<be.uantwerpen.sd.project.data.Recipe> recipes = getRecipesForMealPlan(id);
-                        return Optional.of(new MealPlan(id, date, recipes));
+                        Map<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> meals = getMealsForPlan(
+                                id);
+                        return Optional.of(new MealPlan(id, date, meals));
                     }
                 }
             }
@@ -87,8 +94,9 @@ public class H2MealPlanRepository implements MealPlanRepository {
                 while (rs.next()) {
                     long id = rs.getLong("id");
                     LocalDate date = rs.getDate("date").toLocalDate();
-                    List<be.uantwerpen.sd.project.data.Recipe> recipes = getRecipesForMealPlan(id);
-                    mealPlans.add(new MealPlan(id, date, recipes));
+                    Map<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> meals = getMealsForPlan(
+                            id);
+                    mealPlans.add(new MealPlan(id, date, meals));
                 }
             }
         } catch (java.sql.SQLException e) {
@@ -98,14 +106,11 @@ public class H2MealPlanRepository implements MealPlanRepository {
         return mealPlans;
     }
 
-    private List<be.uantwerpen.sd.project.data.Recipe> getRecipesForMealPlan(long mealPlanId) {
-        List<be.uantwerpen.sd.project.data.Recipe> recipes = new ArrayList<>();
-        // Note: This is a simplified fetch. Ideally, we would join with recipes table
-        // to get full details.
-        // For now, we will fetch the recipe IDs and then fetch the full recipes using
-        // H2RecipeRepository logic
-        // or a join query. Let's do a join query to be efficient.
-        String sql = "SELECT r.* FROM recipes r " +
+    private Map<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> getMealsForPlan(
+            long mealPlanId) {
+        Map<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> meals = new java.util.HashMap<>();
+
+        String sql = "SELECT r.*, mpr.meal_type FROM recipes r " +
                 "JOIN meal_plan_recipes mpr ON r.id = mpr.recipe_id " +
                 "WHERE mpr.meal_plan_id = ?";
 
@@ -113,30 +118,24 @@ public class H2MealPlanRepository implements MealPlanRepository {
             stmt.setLong(1, mealPlanId);
             try (java.sql.ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    // Re-using the logic from H2RecipeRepository would be cleaner, but for now we
-                    // duplicate
-                    // the basic reconstruction or we need to inject RecipeRepository here.
-                    // To avoid circular dependencies or complex injection, we'll just fetch basic
-                    // info
-                    // and maybe tags/ingredients if we want to be thorough.
-                    // Let's keep it simple: just basic recipe info for now.
-                    // If we want full recipes, we should probably refactor to use the
-                    // RecipeRepository.
+                    String typeStr = rs.getString("meal_type");
+                    be.uantwerpen.sd.project.model.MealType type = be.uantwerpen.sd.project.model.MealType
+                            .valueOf(typeStr);
 
-                    // ... actually, let's just fetch basic info to prove persistence works.
-                    be.uantwerpen.sd.project.data.Recipe recipe = new be.uantwerpen.sd.project.data.Recipe(
+                    be.uantwerpen.sd.project.model.Recipe recipe = new be.uantwerpen.sd.project.model.Recipe(
                             rs.getLong("id"),
                             rs.getString("title"),
                             rs.getString("description"),
                             new ArrayList<>(), // Tags - empty for now
                             new ArrayList<>() // Ingredients - empty for now
                     );
-                    recipes.add(recipe);
+
+                    meals.computeIfAbsent(type, k -> new ArrayList<>()).add(recipe);
                 }
             }
         } catch (java.sql.SQLException e) {
             e.printStackTrace();
         }
-        return recipes;
+        return meals;
     }
 }

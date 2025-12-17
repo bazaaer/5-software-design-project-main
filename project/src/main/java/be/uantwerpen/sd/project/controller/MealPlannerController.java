@@ -1,12 +1,12 @@
 package be.uantwerpen.sd.project.controller;
 
-import be.uantwerpen.sd.project.data.Ingredient;
-import be.uantwerpen.sd.project.data.MealPlan;
-import be.uantwerpen.sd.project.data.Recipe;
-import be.uantwerpen.sd.project.storage.IngredientRepository;
-import be.uantwerpen.sd.project.storage.MealPlanRepository;
-import be.uantwerpen.sd.project.storage.RecipeRepository;
-import be.uantwerpen.sd.project.storage.StorageFactory;
+import be.uantwerpen.sd.project.model.Ingredient;
+import be.uantwerpen.sd.project.model.MealPlan;
+import be.uantwerpen.sd.project.model.Recipe;
+import be.uantwerpen.sd.project.model.storage.IngredientRepository;
+import be.uantwerpen.sd.project.model.storage.MealPlanRepository;
+import be.uantwerpen.sd.project.model.storage.RecipeRepository;
+import be.uantwerpen.sd.project.model.storage.StorageFactory;
 import java.util.ArrayList;
 import java.util.List;
 

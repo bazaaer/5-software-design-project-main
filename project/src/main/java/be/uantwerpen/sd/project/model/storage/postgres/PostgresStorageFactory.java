@@ -1,9 +1,9 @@
-package be.uantwerpen.sd.project.storage.postgres;
+package be.uantwerpen.sd.project.model.storage.postgres;
 
-import be.uantwerpen.sd.project.storage.IngredientRepository;
-import be.uantwerpen.sd.project.storage.MealPlanRepository;
-import be.uantwerpen.sd.project.storage.RecipeRepository;
-import be.uantwerpen.sd.project.storage.StorageFactory;
+import be.uantwerpen.sd.project.model.storage.IngredientRepository;
+import be.uantwerpen.sd.project.model.storage.MealPlanRepository;
+import be.uantwerpen.sd.project.model.storage.RecipeRepository;
+import be.uantwerpen.sd.project.model.storage.StorageFactory;
 
 public class PostgresStorageFactory extends StorageFactory {
     private static PostgresStorageFactory instance;

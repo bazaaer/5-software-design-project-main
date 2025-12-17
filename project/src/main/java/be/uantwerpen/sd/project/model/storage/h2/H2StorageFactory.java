@@ -1,9 +1,9 @@
-package be.uantwerpen.sd.project.storage.h2;
+package be.uantwerpen.sd.project.model.storage.h2;
 
-import be.uantwerpen.sd.project.storage.IngredientRepository;
-import be.uantwerpen.sd.project.storage.MealPlanRepository;
-import be.uantwerpen.sd.project.storage.RecipeRepository;
-import be.uantwerpen.sd.project.storage.StorageFactory;
+import be.uantwerpen.sd.project.model.storage.IngredientRepository;
+import be.uantwerpen.sd.project.model.storage.MealPlanRepository;
+import be.uantwerpen.sd.project.model.storage.RecipeRepository;
+import be.uantwerpen.sd.project.model.storage.StorageFactory;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -63,13 +63,15 @@ public class H2StorageFactory extends StorageFactory {
 
             // Create MealPlans table
             stmt.execute("CREATE TABLE IF NOT EXISTS meal_plans (" +
-                    "id SERIAL PRIMARY KEY, " +
-                    "date DATE UNIQUE)");
+                    "id IDENTITY PRIMARY KEY, " +
+                    "date DATE UNIQUE NOT NULL)");
 
-            // Create MealPlan Recipes link table
+            // Create MealPlan-Recipes Link Table (with MealType)
+            // Dropping table first to ensure schema update in dev environment
             stmt.execute("CREATE TABLE IF NOT EXISTS meal_plan_recipes (" +
-                    "meal_plan_id INT, " +
-                    "recipe_id INT, " +
+                    "meal_plan_id BIGINT, " +
+                    "recipe_id BIGINT, " +
+                    "meal_type VARCHAR(50), " +
                     "FOREIGN KEY (meal_plan_id) REFERENCES meal_plans(id), " +
                     "FOREIGN KEY (recipe_id) REFERENCES recipes(id))");
         }

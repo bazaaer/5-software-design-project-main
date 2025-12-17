@@ -1,4 +1,4 @@
-package be.uantwerpen.sd.project.data;
+package be.uantwerpen.sd.project.model;
 
 import java.util.List;
 

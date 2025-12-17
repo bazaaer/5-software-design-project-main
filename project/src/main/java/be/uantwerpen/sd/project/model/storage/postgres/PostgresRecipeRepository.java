@@ -1,8 +1,7 @@
-package be.uantwerpen.sd.project.storage.postgres;
+package be.uantwerpen.sd.project.model.storage.postgres;
 
-import be.uantwerpen.sd.project.storage.RecipeRepository;
-
-import be.uantwerpen.sd.project.data.Recipe;
+import be.uantwerpen.sd.project.model.storage.RecipeRepository;
+import be.uantwerpen.sd.project.model.Recipe;
 import java.util.ArrayList;
 import java.util.List;
 

@@ -1,8 +1,8 @@
-package be.uantwerpen.sd.project.storage.h2;
+package be.uantwerpen.sd.project.model.storage.h2;
 
-import be.uantwerpen.sd.project.storage.RecipeRepository;
-import be.uantwerpen.sd.project.data.Recipe;
-import be.uantwerpen.sd.project.data.Ingredient;
+import be.uantwerpen.sd.project.model.storage.RecipeRepository;
+import be.uantwerpen.sd.project.model.Recipe;
+import be.uantwerpen.sd.project.model.Ingredient;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

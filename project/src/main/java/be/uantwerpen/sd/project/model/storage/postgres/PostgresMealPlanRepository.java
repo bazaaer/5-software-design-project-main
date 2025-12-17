@@ -1,8 +1,8 @@
-package be.uantwerpen.sd.project.storage.postgres;
+package be.uantwerpen.sd.project.model.storage.postgres;
 
-import be.uantwerpen.sd.project.storage.MealPlanRepository;
+import be.uantwerpen.sd.project.model.storage.MealPlanRepository;
 
-import be.uantwerpen.sd.project.data.MealPlan;
+import be.uantwerpen.sd.project.model.MealPlan;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
