@@ -1,7 +1,7 @@
 package be.uantwerpen.sd.project.model.storage.postgres;
 
-import be.uantwerpen.sd.project.model.storage.IngredientRepository;
 import be.uantwerpen.sd.project.model.storage.MealPlanRepository;
+import be.uantwerpen.sd.project.model.storage.GroceryDeltaRepository;
 import be.uantwerpen.sd.project.model.storage.RecipeRepository;
 import be.uantwerpen.sd.project.model.storage.StorageFactory;
 
@@ -26,12 +26,12 @@ public class PostgresStorageFactory extends StorageFactory {
     }
 
     @Override
-    public IngredientRepository getIngredientRepository() {
-        return new PostgresIngredientRepository();
+    public MealPlanRepository getMealPlanRepository() {
+        return new PostgresMealPlanRepository();
     }
 
     @Override
-    public MealPlanRepository getMealPlanRepository() {
-        return new PostgresMealPlanRepository();
+    public GroceryDeltaRepository getGroceryDeltaRepository() {
+        throw new UnsupportedOperationException("Postgres storage not implemented yet.");
     }
 }

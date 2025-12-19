@@ -33,7 +33,6 @@ replay_pid*
 *.iml
 .vscode/
 .classpath
-.project
 .settings/
 
 # OS
@@ -42,9 +41,10 @@ replay_pid*
 # Misc
 *.swp
 **/.m2-autograder/
-.mvn
 
 # Database
 *.db
+*.mv.db
 *.trace.db
-uml_diagram.md
+lab5/*
+

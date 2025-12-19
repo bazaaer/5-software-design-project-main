@@ -1,9 +1,13 @@
 package be.uantwerpen.sd.project.model.storage.h2;
 
 import be.uantwerpen.sd.project.model.storage.MealPlanRepository;
-
+import be.uantwerpen.sd.project.model.storage.RecipeRepository;
 import be.uantwerpen.sd.project.model.MealPlan;
+import be.uantwerpen.sd.project.model.MealType;
+import be.uantwerpen.sd.project.model.Recipe;
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,74 +16,87 @@ import java.util.Optional;
 
 public class H2MealPlanRepository implements MealPlanRepository {
     private Connection connection;
+    private RecipeRepository recipeRepository;
 
-    public H2MealPlanRepository(Connection connection) {
+    public H2MealPlanRepository(Connection connection, RecipeRepository recipeRepository) {
         this.connection = connection;
+        this.recipeRepository = recipeRepository;
     }
 
     @Override
     public MealPlan save(MealPlan plan) {
-        long planId = -1;
         try {
-            // 1. Save MealPlan
-            String sql = "INSERT INTO meal_plans (date) VALUES (?)";
-            try (java.sql.PreparedStatement stmt = connection.prepareStatement(sql,
-                    java.sql.Statement.RETURN_GENERATED_KEYS)) {
-                stmt.setDate(1, java.sql.Date.valueOf(plan.date()));
-                stmt.executeUpdate();
+            Long existingId = findPlanIdByDate(plan.date());
+            long planId = existingId == null ? insertPlan(plan.date()) : existingId;
 
-                try (java.sql.ResultSet generatedKeys = stmt.getGeneratedKeys()) {
-                    if (generatedKeys.next()) {
-                        planId = generatedKeys.getLong(1);
-                        System.out.println("[H2] Saved meal plan for date: " + plan.date() + " with ID: " + planId);
-                    }
+            if (existingId != null) {
+                try (PreparedStatement delete = connection
+                        .prepareStatement("DELETE FROM meal_plan_recipes WHERE meal_plan_id = ?")) {
+                    delete.setLong(1, planId);
+                    delete.executeUpdate();
                 }
             }
 
-            if (planId != -1) {
-                // 2. Save Recipe Links with MealType
-                String linkSql = "INSERT INTO meal_plan_recipes (meal_plan_id, recipe_id, meal_type) VALUES (?, ?, ?)";
-                try (java.sql.PreparedStatement linkStmt = connection.prepareStatement(linkSql)) {
-                    for (Map.Entry<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> entry : plan
-                            .meals().entrySet()) {
-                        be.uantwerpen.sd.project.model.MealType type = entry.getKey();
-                        for (be.uantwerpen.sd.project.model.Recipe recipe : entry.getValue()) {
-                            if (recipe.id() != null) {
-                                linkStmt.setLong(1, planId);
-                                linkStmt.setLong(2, recipe.id());
-                                linkStmt.setString(3, type.name());
-                                linkStmt.addBatch();
-                            }
-                        }
+            String linkSql = "INSERT INTO meal_plan_recipes (meal_plan_id, recipe_id, meal_type) VALUES (?, ?, ?)";
+            try (PreparedStatement linkStmt = connection.prepareStatement(linkSql)) {
+                for (Map.Entry<MealType, List<Recipe>> entry : plan.meals().entrySet()) {
+                    for (Recipe recipe : entry.getValue()) {
+                        linkStmt.setLong(1, planId);
+                        linkStmt.setLong(2, recipe.id());
+                        linkStmt.setString(3, entry.getKey().name());
+                        linkStmt.addBatch();
                     }
-                    linkStmt.executeBatch();
                 }
-                return new MealPlan(planId, plan.date(), plan.meals());
+                linkStmt.executeBatch();
             }
 
+            return new MealPlan(planId, plan.date(), plan.meals());
         } catch (java.sql.SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        return plan;
+    }
+
+    private Long findPlanIdByDate(LocalDate date) throws java.sql.SQLException {
+        String sql = "SELECT id FROM meal_plans WHERE date = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
+            stmt.setDate(1, java.sql.Date.valueOf(date));
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getLong("id");
+                }
+            }
+        }
+        return null;
+    }
+
+    private long insertPlan(LocalDate date) throws java.sql.SQLException {
+        String sql = "INSERT INTO meal_plans (date) VALUES (?)";
+        try (PreparedStatement stmt = connection.prepareStatement(sql, java.sql.Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setDate(1, java.sql.Date.valueOf(date));
+            stmt.executeUpdate();
+            try (ResultSet generatedKeys = stmt.getGeneratedKeys()) {
+                generatedKeys.next();
+                return generatedKeys.getLong(1);
+            }
+        }
     }
 
     @Override
     public Optional<MealPlan> findByDate(LocalDate date) {
         try {
             String sql = "SELECT * FROM meal_plans WHERE date = ?";
-            try (java.sql.PreparedStatement stmt = connection.prepareStatement(sql)) {
+            try (PreparedStatement stmt = connection.prepareStatement(sql)) {
                 stmt.setDate(1, java.sql.Date.valueOf(date));
-                try (java.sql.ResultSet rs = stmt.executeQuery()) {
+                try (ResultSet rs = stmt.executeQuery()) {
                     if (rs.next()) {
                         long id = rs.getLong("id");
-                        Map<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> meals = getMealsForPlan(
-                                id);
+                        Map<MealType, List<Recipe>> meals = getMealsForPlan(id);
                         return Optional.of(new MealPlan(id, date, meals));
                     }
                 }
             }
         } catch (java.sql.SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return Optional.empty();
     }
@@ -89,52 +106,36 @@ public class H2MealPlanRepository implements MealPlanRepository {
         List<MealPlan> mealPlans = new ArrayList<>();
         try {
             String sql = "SELECT * FROM meal_plans";
-            try (java.sql.Statement stmt = connection.createStatement();
-                    java.sql.ResultSet rs = stmt.executeQuery(sql)) {
+            try (java.sql.Statement stmt = connection.createStatement(); ResultSet rs = stmt.executeQuery(sql)) {
                 while (rs.next()) {
                     long id = rs.getLong("id");
                     LocalDate date = rs.getDate("date").toLocalDate();
-                    Map<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> meals = getMealsForPlan(
-                            id);
+                    Map<MealType, List<Recipe>> meals = getMealsForPlan(id);
                     mealPlans.add(new MealPlan(id, date, meals));
                 }
             }
         } catch (java.sql.SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
-        System.out.println("[H2] Found " + mealPlans.size() + " meal plans");
         return mealPlans;
     }
 
-    private Map<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> getMealsForPlan(
-            long mealPlanId) {
-        Map<be.uantwerpen.sd.project.model.MealType, List<be.uantwerpen.sd.project.model.Recipe>> meals = new java.util.HashMap<>();
+    private Map<MealType, List<Recipe>> getMealsForPlan(long mealPlanId) {
+        Map<MealType, List<Recipe>> meals = new java.util.HashMap<>();
 
-        String sql = "SELECT r.*, mpr.meal_type FROM recipes r " +
-                "JOIN meal_plan_recipes mpr ON r.id = mpr.recipe_id " +
-                "WHERE mpr.meal_plan_id = ?";
-
-        try (java.sql.PreparedStatement stmt = connection.prepareStatement(sql)) {
+        String sql = "SELECT recipe_id, meal_type FROM meal_plan_recipes WHERE meal_plan_id = ?";
+        try (PreparedStatement stmt = connection.prepareStatement(sql)) {
             stmt.setLong(1, mealPlanId);
-            try (java.sql.ResultSet rs = stmt.executeQuery()) {
+            try (ResultSet rs = stmt.executeQuery()) {
                 while (rs.next()) {
-                    String typeStr = rs.getString("meal_type");
-                    be.uantwerpen.sd.project.model.MealType type = be.uantwerpen.sd.project.model.MealType
-                            .valueOf(typeStr);
-
-                    be.uantwerpen.sd.project.model.Recipe recipe = new be.uantwerpen.sd.project.model.Recipe(
-                            rs.getLong("id"),
-                            rs.getString("title"),
-                            rs.getString("description"),
-                            new ArrayList<>(), // Tags - empty for now
-                            new ArrayList<>() // Ingredients - empty for now
-                    );
-
+                    long recipeId = rs.getLong("recipe_id");
+                    MealType type = MealType.valueOf(rs.getString("meal_type"));
+                    Recipe recipe = recipeRepository.findById(recipeId).orElseThrow();
                     meals.computeIfAbsent(type, k -> new ArrayList<>()).add(recipe);
                 }
             }
         } catch (java.sql.SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
         return meals;
     }

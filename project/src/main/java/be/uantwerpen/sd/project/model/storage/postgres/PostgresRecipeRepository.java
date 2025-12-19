@@ -4,6 +4,7 @@ import be.uantwerpen.sd.project.model.storage.RecipeRepository;
 import be.uantwerpen.sd.project.model.Recipe;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class PostgresRecipeRepository implements RecipeRepository {
     @Override
@@ -12,6 +13,17 @@ public class PostgresRecipeRepository implements RecipeRepository {
         return recipe;
     }
     // TODO: add the actual logic
+
+    @Override
+    public void deleteById(long id) {
+        System.out.println("[Postgres] Deleting recipe by id: " + id);
+    }
+
+    @Override
+    public Optional<Recipe> findById(long id) {
+        System.out.println("[Postgres] Finding recipe by id: " + id);
+        return Optional.empty();
+    }
 
     @Override
     public List<Recipe> findAll() {
