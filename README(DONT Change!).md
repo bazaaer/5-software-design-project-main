@@ -305,7 +305,7 @@ This is an **internal planning** for our team.
 
 ### General
 
-- [ ] Complete README with real names, r-numbers, and repo URL  
+- [ ] Complete README with real names, r-numbers, and repo URL, AI-Document  
 - [x] Set up base project (package structure, main class, build-tool configuration)  
 - [x] Align folder structure with labs (src/main/java, src/test/java, …)  
 
@@ -333,9 +333,9 @@ This is an **internal planning** for our team.
 ### UML & documentation
 
 - [x] Create global class diagram  
-- [ ] Create mini class diagrams per pattern  
+- [x] Create mini class diagrams per pattern  
 - [x] Draw use case diagram  
-- [ ] Create at least one sequence diagram  
+- [x] Create at least one sequence diagram  
 - [x] Update UML when major design changes occur  
 
 ### Tests
