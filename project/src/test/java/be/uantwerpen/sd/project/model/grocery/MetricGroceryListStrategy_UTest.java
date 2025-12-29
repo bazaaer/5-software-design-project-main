@@ -23,7 +23,7 @@ public class MetricGroceryListStrategy_UTest {
         // Compare the input with the output
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Pasta", ingredient.name());
         assertEquals(999, ingredient.amount());
         assertEquals("g", ingredient.unit());
@@ -46,7 +46,7 @@ public class MetricGroceryListStrategy_UTest {
 
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Tomato Sauce", ingredient.name());
         assertEquals(1, ingredient.amount());
         assertEquals("kg", ingredient.unit());
@@ -66,7 +66,7 @@ public class MetricGroceryListStrategy_UTest {
 
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Meat", ingredient.name());
         assertEquals(1.001, ingredient.amount());
         assertEquals("kg", ingredient.unit());

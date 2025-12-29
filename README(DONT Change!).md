@@ -340,7 +340,7 @@ This is an **internal planning** for our team.
 
 ### Tests
 
-- [ ] Write unit tests for main domain classes  
+- [x] Write unit tests for main domain classes  
 - [ ] Set up integration test for a realistic use case  
 - [ ] Check test coverage and extend where needed  
 

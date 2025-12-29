@@ -22,7 +22,7 @@ public class ImperialGroceryListStrategy_UTest {
         // Compare the input with the output
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Pasta", ingredient.name());
         assertEquals(0.988, ingredient.amount());
         assertEquals("oz", ingredient.unit());
@@ -45,7 +45,7 @@ public class ImperialGroceryListStrategy_UTest {
 
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Pasta", ingredient.name());
         assertEquals(1, ingredient.amount());
         assertEquals("oz", ingredient.unit());
@@ -67,7 +67,7 @@ public class ImperialGroceryListStrategy_UTest {
 
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Pasta", ingredient.name());
         assertEquals(1.023, ingredient.amount());
         assertEquals("oz", ingredient.unit());
@@ -88,7 +88,7 @@ public class ImperialGroceryListStrategy_UTest {
 
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Meat", ingredient.name());
         assertEquals(15.997, ingredient.amount());
         assertEquals("oz", ingredient.unit());
@@ -108,7 +108,7 @@ public class ImperialGroceryListStrategy_UTest {
 
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Meat", ingredient.name());
         assertEquals(16, ingredient.amount());
         assertEquals("oz", ingredient.unit());
@@ -128,7 +128,7 @@ public class ImperialGroceryListStrategy_UTest {
 
         assertEquals(1, result.size());
 
-        Ingredient ingredient = result.get(0);
+        Ingredient ingredient = result.getFirst();
         assertEquals("Meat", ingredient.name());
         assertEquals(1.001, ingredient.amount());
         assertEquals("lb", ingredient.unit());
