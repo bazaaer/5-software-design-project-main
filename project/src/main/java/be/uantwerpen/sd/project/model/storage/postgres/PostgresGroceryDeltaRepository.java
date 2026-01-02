@@ -1,4 +1,4 @@
-package be.uantwerpen.sd.project.model.storage.h2;
+package be.uantwerpen.sd.project.model.storage.postgres;
 
 import be.uantwerpen.sd.project.model.Ingredient;
 import be.uantwerpen.sd.project.model.storage.GroceryDeltaRepository;
@@ -12,10 +12,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class H2GroceryDeltaRepository implements GroceryDeltaRepository {
+public class PostgresGroceryDeltaRepository implements GroceryDeltaRepository {
     private final Connection connection;
 
-    public H2GroceryDeltaRepository(Connection connection) {
+    public PostgresGroceryDeltaRepository(Connection connection) {
         this.connection = connection;
     }
 
@@ -41,7 +41,8 @@ public class H2GroceryDeltaRepository implements GroceryDeltaRepository {
         try {
             if (bought) {
                 try (PreparedStatement ps = connection.prepareStatement(
-                        "MERGE INTO grocery_bought (week_start, name_key, dimension) KEY (week_start, name_key, dimension) VALUES (?, ?, ?)")) {
+                        "INSERT INTO grocery_bought (week_start, name_key, dimension) VALUES (?, ?, ?) " +
+                                "ON CONFLICT (week_start, name_key, dimension) DO NOTHING")) {
                     ps.setDate(1, java.sql.Date.valueOf(weekStart));
                     ps.setString(2, key.nameKey());
                     ps.setString(3, key.dimension());

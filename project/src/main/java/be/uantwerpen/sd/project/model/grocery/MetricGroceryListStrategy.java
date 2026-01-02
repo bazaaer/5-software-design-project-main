@@ -11,6 +11,7 @@ public class MetricGroceryListStrategy implements GroceryListStrategy {
 
     @Override
     public List<Ingredient> combine(List<Ingredient> ingredients) {
+        // Strategy impl: metric merge + unit conversion
         Map<Key, Accumulator> summed = new HashMap<>();
 
         for (Ingredient ingredient : ingredients) {
@@ -46,9 +47,6 @@ public class MetricGroceryListStrategy implements GroceryListStrategy {
     }
 
     private static String normalizeName(String name) {
-        if (name == null) {
-            return "";
-        }
         return name.trim();
     }
 

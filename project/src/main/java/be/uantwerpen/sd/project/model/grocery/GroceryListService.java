@@ -18,6 +18,7 @@ import java.util.Set;
 public class GroceryListService {
     public static final String PROP_GROCERY_LIST = "groceryList";
 
+    // Observer pattern: grocery list updates are pushed to listeners
     private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
     private GroceryListStrategy strategy;
@@ -45,17 +46,16 @@ public class GroceryListService {
         if (weekChanged) {
             boughtKeys.clear();
             extraItems.clear();
-            if (deltaRepository != null && currentWeekStart != null) {
-                for (GroceryDeltaRepository.BoughtKey key : deltaRepository.findBoughtKeys(currentWeekStart)) {
-                    boughtKeys.add(Key.from(key));
-                }
-                extraItems.addAll(deltaRepository.findExtraItems(currentWeekStart));
+            for (GroceryDeltaRepository.BoughtKey key : deltaRepository.findBoughtKeys(currentWeekStart)) {
+                boughtKeys.add(Key.from(key));
             }
+            extraItems.addAll(deltaRepository.findExtraItems(currentWeekStart));
         }
         recompute();
     }
 
     public void setStrategy(GroceryListStrategy strategy) {
+        // Strategy swap
         this.strategy = strategy;
         recompute();
     }
@@ -66,17 +66,13 @@ public class GroceryListService {
 
     public void addExtraItem(Ingredient ingredient) {
         extraItems.add(ingredient);
-        if (deltaRepository != null && currentWeekStart != null) {
-            deltaRepository.addExtraItem(currentWeekStart, ingredient);
-        }
+        deltaRepository.addExtraItem(currentWeekStart, ingredient);
         recompute();
     }
 
     public void removeExtraItem(Ingredient ingredient) {
         extraItems.remove(ingredient);
-        if (deltaRepository != null && currentWeekStart != null) {
-            deltaRepository.removeExtraItem(currentWeekStart, ingredient);
-        }
+        deltaRepository.removeExtraItem(currentWeekStart, ingredient);
         recompute();
     }
 
@@ -87,9 +83,7 @@ public class GroceryListService {
         } else {
             boughtKeys.remove(key);
         }
-        if (deltaRepository != null && currentWeekStart != null) {
-            deltaRepository.setBought(currentWeekStart, key.asBoughtKey(), bought);
-        }
+        deltaRepository.setBought(currentWeekStart, key.asBoughtKey(), bought);
         recompute();
     }
 
@@ -102,6 +96,7 @@ public class GroceryListService {
     }
 
     private void recompute() {
+        // rebuild list + fire change if it actually changed
         List<GroceryItem> oldList = this.groceryList;
         List<Ingredient> combined = strategy.combine(flattenIngredients(currentMealPlan, extraItems));
         List<GroceryItem> newList = combined.stream()
@@ -115,12 +110,11 @@ public class GroceryListService {
     }
 
     private static List<Ingredient> flattenIngredients(MealPlan plan, List<Ingredient> extras) {
+        // flatten all recipe ingredients + extras into one list
         List<Ingredient> ingredients = new ArrayList<>();
-        if (plan != null) {
-            for (List<Recipe> recipes : plan.meals().values()) {
-                for (Recipe recipe : recipes) {
-                    ingredients.addAll(recipe.ingredients());
-                }
+        for (List<Recipe> recipes : plan.meals().values()) {
+            for (Recipe recipe : recipes) {
+                ingredients.addAll(recipe.ingredients());
             }
         }
         ingredients.addAll(extras);
@@ -148,16 +142,10 @@ public class GroceryListService {
     }
 
     private static String normalizeName(String name) {
-        if (name == null) {
-            return "";
-        }
         return name.trim();
     }
 
     private static LocalDate weekStart(MealPlan mealPlan) {
-        if (mealPlan == null) {
-            return null;
-        }
         return mealPlan.date().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY));
     }
 }

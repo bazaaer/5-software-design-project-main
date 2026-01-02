@@ -5,7 +5,6 @@ import be.uantwerpen.sd.project.model.Ingredient;
 import be.uantwerpen.sd.project.model.MealPlan;
 import be.uantwerpen.sd.project.model.MealType;
 import be.uantwerpen.sd.project.model.Recipe;
-import be.uantwerpen.sd.project.model.grocery.GroceryListService;
 import be.uantwerpen.sd.project.model.grocery.ImperialGroceryListStrategy;
 import be.uantwerpen.sd.project.model.grocery.MetricGroceryListStrategy;
 import java.beans.PropertyChangeEvent;
@@ -19,29 +18,25 @@ import java.util.List;
 import java.util.Map;
 
 public final class MealPlannerViewLogic implements PropertyChangeListener {
-    private final GroceryListService model;
     private final MealPlannerController controller;
     private final RenderPort ui;
 
     private LocalDate weekStart;
     private final Map<LocalDate, Map<MealType, Recipe>> plannedWeek = new HashMap<>();
 
-    public MealPlannerViewLogic(GroceryListService model, MealPlannerController controller, RenderPort ui) {
-        this.model = model;
+    public MealPlannerViewLogic(MealPlannerController controller, RenderPort ui) {
         this.controller = controller;
         this.ui = ui;
 
-        model.addPropertyChangeListener(this);
+        // Observer: listen for grocery list updates
+        controller.addGroceryListListener(this);
 
         ui.showRecipes(controller.getAllRecipes());
         onWeekSelected(LocalDate.now());
-        ui.showGroceryList(model.getGroceryList());
+        ui.showGroceryList(controller.getGroceryList());
     }
 
     public void onWeekSelected(LocalDate anyDateInWeek) {
-        if (anyDateInWeek == null) {
-            return;
-        }
         weekStart = anyDateInWeek.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
 
         plannedWeek.clear();
@@ -57,84 +52,60 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
     }
 
     public void onAddRecipe(String title, String description, String tagsRaw, List<Ingredient> ingredients) {
-        try {
-            String trimmedTitle = title == null ? "" : title.trim();
-            if (trimmedTitle.isBlank()) {
-                throw new IllegalArgumentException("Title is required.");
-            }
-            String desc = description == null ? "" : description.trim();
-            List<String> tags = parseTags(tagsRaw);
-            controller.addRecipe(trimmedTitle, desc, tags, ingredients);
-            ui.clearRecipeInputs();
-            ui.showRecipes(controller.getAllRecipes());
-        } catch (RuntimeException ex) {
-            ui.showError(ex.getMessage());
-        }
+        String trimmedTitle = title.trim();
+        String desc = description.trim();
+        List<String> tags = parseTags(tagsRaw);
+        controller.addRecipe(trimmedTitle, desc, tags, ingredients);
+        ui.clearRecipeInputs();
+        ui.showRecipes(controller.getAllRecipes());
     }
 
     public void onUpdateRecipe(long id, String title, String description, String tagsRaw, List<Ingredient> ingredients) {
-        try {
-            String trimmedTitle = title == null ? "" : title.trim();
-            if (trimmedTitle.isBlank()) {
-                throw new IllegalArgumentException("Title is required.");
-            }
-            String desc = description == null ? "" : description.trim();
-            List<String> tags = parseTags(tagsRaw);
-            Recipe updated = controller.updateRecipe(id, trimmedTitle, desc, tags, ingredients);
+        String trimmedTitle = title.trim();
+        String desc = description.trim();
+        List<String> tags = parseTags(tagsRaw);
+        Recipe updated = controller.updateRecipe(id, trimmedTitle, desc, tags, ingredients);
 
-            for (Map<MealType, Recipe> day : plannedWeek.values()) {
-                for (MealType type : MealType.values()) {
-                    Recipe r = day.get(type);
-                    if (r != null && r.id() != null && r.id().equals(updated.id())) {
-                        day.put(type, updated);
-                    }
+        for (Map<MealType, Recipe> day : plannedWeek.values()) {
+            for (MealType type : MealType.values()) {
+                Recipe r = day.get(type);
+                if (r != null && r.id().equals(updated.id())) {
+                    day.put(type, updated);
                 }
             }
-
-            controller.selectMealPlan(aggregateWeekMealPlan());
-            ui.showRecipes(controller.getAllRecipes());
-            ui.showWeek(weekStart, snapshotWeek());
-            ui.showStatus("Updated recipe.");
-        } catch (RuntimeException ex) {
-            ui.showError(ex.getMessage());
         }
+
+        controller.selectMealPlan(aggregateWeekMealPlan());
+        ui.showRecipes(controller.getAllRecipes());
+        ui.showWeek(weekStart, snapshotWeek());
+        ui.showStatus("Updated recipe.");
     }
 
     public void onDeleteRecipe(long id) {
-        try {
-            controller.deleteRecipe(id);
+        controller.deleteRecipe(id);
 
-            for (Map<MealType, Recipe> day : plannedWeek.values()) {
-                for (MealType type : MealType.values()) {
-                    Recipe r = day.get(type);
-                    if (r != null && r.id() != null && r.id() == id) {
-                        day.put(type, null);
-                    }
+        for (Map<MealType, Recipe> day : plannedWeek.values()) {
+            for (MealType type : MealType.values()) {
+                Recipe r = day.get(type);
+                if (r != null && r.id() == id) {
+                    day.put(type, null);
                 }
             }
-
-            controller.selectMealPlan(aggregateWeekMealPlan());
-            ui.showRecipes(controller.getAllRecipes());
-            ui.showWeek(weekStart, snapshotWeek());
-            ui.showStatus("Deleted recipe.");
-        } catch (RuntimeException ex) {
-            ui.showError(ex.getMessage());
         }
+
+        controller.selectMealPlan(aggregateWeekMealPlan());
+        ui.showRecipes(controller.getAllRecipes());
+        ui.showWeek(weekStart, snapshotWeek());
+        ui.showStatus("Deleted recipe.");
     }
 
     public void onSetRecipeForSlot(LocalDate date, MealType mealType, Recipe recipe) {
-        if (weekStart == null || date == null || mealType == null) {
-            return;
-        }
         plannedWeek.computeIfAbsent(date, ignored -> emptySlots()).put(mealType, recipe);
         controller.selectMealPlan(aggregateWeekMealPlan());
         ui.showWeek(weekStart, snapshotWeek());
     }
 
     public void onSaveWeek() {
-        if (weekStart == null) {
-            return;
-        }
         for (int i = 0; i < 7; i++) {
             LocalDate day = weekStart.plusDays(i);
             Map<MealType, Recipe> slots = plannedWeek.getOrDefault(day, emptySlots());
@@ -153,13 +124,9 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
     }
 
     public void onAddExtraItem(String name, String amountRaw, String unit) {
-        try {
-            double amount = Double.parseDouble(amountRaw);
-            controller.addExtraGroceryItem(new Ingredient(name, amount, unit));
-            ui.clearExtraItemInputs();
-        } catch (RuntimeException ex) {
-            ui.showError(ex.getMessage());
-        }
+        double amount = Double.parseDouble(amountRaw);
+        controller.addExtraGroceryItem(new Ingredient(name, amount, unit));
+        ui.clearExtraItemInputs();
     }
 
     public void onSetBought(String name, String unit, boolean bought) {
@@ -168,10 +135,8 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        if (!GroceryListService.PROP_GROCERY_LIST.equals(evt.getPropertyName())) {
-            return;
-        }
-        ui.showGroceryList(model.getGroceryList());
+        // Observer hook for grocery list changes
+        ui.showGroceryList(controller.getGroceryList());
     }
 
     private Map<LocalDate, Map<MealType, List<Recipe>>> snapshotWeek() {
@@ -229,16 +194,11 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
     }
 
     private static List<String> parseTags(String raw) {
-        if (raw == null || raw.isBlank()) {
-            return List.of();
-        }
         String[] parts = raw.split(",");
         List<String> tags = new ArrayList<>();
         for (String part : parts) {
             String tag = part.trim();
-            if (!tag.isBlank()) {
-                tags.add(tag);
-            }
+            tags.add(tag);
         }
         return tags;
     }

@@ -26,7 +26,7 @@ public class ViewApp extends Application {
         MealPlannerController controller = new MealPlannerController(storageFactory, model);
 
         MealPlannerView view = new MealPlannerView();
-        MealPlannerViewLogic logic = new MealPlannerViewLogic(model, controller, view);
+        MealPlannerViewLogic logic = new MealPlannerViewLogic(controller, view);
         view.attachLogic(logic);
 
         stage.setTitle("Meal Planner — MVC (JavaFX)");

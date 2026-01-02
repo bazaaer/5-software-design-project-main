@@ -10,6 +10,7 @@ import be.uantwerpen.sd.project.model.grocery.MetricGroceryListStrategy;
 import be.uantwerpen.sd.project.model.storage.MealPlanRepository;
 import be.uantwerpen.sd.project.model.storage.RecipeRepository;
 import be.uantwerpen.sd.project.model.storage.StorageFactory;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 
 public class MealPlannerController {
@@ -28,12 +29,30 @@ public class MealPlannerController {
     }
 
     public Recipe addRecipe(String title, String description, List<String> tags, List<Ingredient> ingredients) {
-        Recipe recipe = new Recipe(title, description, tags, ingredients);
+        String safeTitle = title == null ? "" : title.trim();
+        if (safeTitle.isBlank()) {
+            throw new IllegalArgumentException("title pls");
+        }
+        if (ingredients == null || ingredients.isEmpty()) {
+            throw new IllegalArgumentException("need some ingredients");
+        }
+        String safeDescription = description == null ? "" : description.trim();
+        List<String> safeTags = tags == null ? List.of() : tags;
+        Recipe recipe = new Recipe(safeTitle, safeDescription, safeTags, ingredients);
         return recipeRepository.save(recipe);
     }
 
     public Recipe updateRecipe(long id, String title, String description, List<String> tags, List<Ingredient> ingredients) {
-        return recipeRepository.save(new Recipe(id, title, description, tags, ingredients));
+        String safeTitle = title == null ? "" : title.trim();
+        if (safeTitle.isBlank()) {
+            throw new IllegalArgumentException("title pls");
+        }
+        if (ingredients == null || ingredients.isEmpty()) {
+            throw new IllegalArgumentException("need some ingredients");
+        }
+        String safeDescription = description == null ? "" : description.trim();
+        List<String> safeTags = tags == null ? List.of() : tags;
+        return recipeRepository.save(new Recipe(id, safeTitle, safeDescription, safeTags, ingredients));
     }
 
     public void deleteRecipe(long id) {
@@ -41,11 +60,17 @@ public class MealPlannerController {
     }
 
     public void addMealPlan(MealPlan plan) {
+        if (plan == null) {
+            throw new IllegalArgumentException("plan pls");
+        }
         MealPlan saved = mealPlanRepository.save(plan);
         groceryListService.setMealPlan(saved);
     }
 
     public MealPlan saveMealPlan(MealPlan plan) {
+        if (plan == null) {
+            throw new IllegalArgumentException("plan pls");
+        }
         return mealPlanRepository.save(plan);
     }
 
@@ -74,14 +99,28 @@ public class MealPlannerController {
     }
 
     public void addExtraGroceryItem(Ingredient ingredient) {
+        if (ingredient == null) {
+            throw new IllegalArgumentException("ingredient pls");
+        }
         groceryListService.addExtraItem(ingredient);
     }
 
     public void removeExtraGroceryItem(Ingredient ingredient) {
+        if (ingredient == null) {
+            throw new IllegalArgumentException("ingredient pls");
+        }
         groceryListService.removeExtraItem(ingredient);
     }
 
     public void setGroceryItemBought(String name, String unit, boolean bought) {
         groceryListService.setBought(name, unit, bought);
+    }
+
+    public void addGroceryListListener(PropertyChangeListener listener) {
+        groceryListService.addPropertyChangeListener(listener);
+    }
+
+    public void removeGroceryListListener(PropertyChangeListener listener) {
+        groceryListService.removePropertyChangeListener(listener);
     }
 }

@@ -19,11 +19,11 @@ public class Main {
     public static void main(String[] args) {
         System.out.println("Starting Meal Planner...");
 
-        // 1. Get the StorageFactory (Singleton)
-        // Currently uses H2 (local file) for simplicity
+        // grab the storage factory (singleton)
+        // right now its using H2 local file 
         StorageFactory storageFactory = StorageFactory.getInstance();
 
-        // 2. Create the Controller
+        // make the controller
         GroceryListService model = new GroceryListService(
                 new MetricGroceryListStrategy(),
                 storageFactory.getGroceryDeltaRepository());

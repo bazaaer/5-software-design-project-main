@@ -120,21 +120,11 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         addIngredientRow.setOnAction(evt -> ingredientRowsBox.getChildren().add(new IngredientRow()));
 
         addRecipeButton.setOnAction(evt -> {
-            if (logic == null) {
-                return;
-            }
-            String titleText = recipeTitleField.getText() == null ? "" : recipeTitleField.getText().trim();
-            if (titleText.isBlank()) {
-                showError("Title is required");
-                return;
-            }
+            String titleText = recipeTitleField.getText().trim();
             logic.onAddRecipe(titleText, recipeDescriptionField.getText(), recipeTagsField.getText(), collectIngredients());
         });
 
         updateRecipeButton.setOnAction(evt -> {
-            if (logic == null || selectedRecipe == null || selectedRecipe.id() == null) {
-                return;
-            }
             logic.onUpdateRecipe(
                     selectedRecipe.id(),
                     recipeTitleField.getText(),
@@ -144,9 +134,6 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         });
 
         deleteRecipeButton.setOnAction(evt -> {
-            if (logic == null || selectedRecipe == null || selectedRecipe.id() == null) {
-                return;
-            }
             logic.onDeleteRecipe(selectedRecipe.id());
             clearRecipeInputs();
             recipeList.getSelectionModel().clearSelection();
@@ -174,16 +161,12 @@ public class MealPlannerView extends BorderPane implements RenderPort {
 
         weekPicker.setValue(LocalDate.now());
         weekPicker.valueProperty().addListener((obs, oldDate, newDate) -> {
-            if (logic != null) {
-                logic.onWeekSelected(newDate);
-            }
+            logic.onWeekSelected(newDate);
         });
 
         Button saveWeek = new Button("Save Week");
         saveWeek.setOnAction(evt -> {
-            if (logic != null) {
-                logic.onSaveWeek();
-            }
+            logic.onSaveWeek();
         });
 
         statusLabel.setStyle("-fx-opacity: 0.75;");
@@ -295,31 +278,22 @@ public class MealPlannerView extends BorderPane implements RenderPort {
 
     private void handleDrop(DragEvent evt, ListView<Recipe> slot, int dayOffset, MealType mealType) {
         boolean success = false;
-        try {
-            Dragboard db = evt.getDragboard();
-            if (db.hasString() && db.getString().startsWith("recipeId:")) {
-                String idRaw = db.getString().substring("recipeId:".length());
-                long id = Long.parseLong(idRaw);
-                Recipe recipe = findRecipeById(id);
-                if (recipe != null) {
-                    if (logic != null) {
-                        LocalDate date = currentWeekStart.plusDays(dayOffset);
-                        logic.onSetRecipeForSlot(date, mealType, recipe);
-                    }
-                    success = true;
-                }
-            }
-        } catch (RuntimeException ex) {
-            showError(ex.getMessage());
-        } finally {
-            evt.setDropCompleted(success);
-            evt.consume();
+        Dragboard db = evt.getDragboard();
+        if (db.hasString() && db.getString().startsWith("recipeId:")) {
+            String idRaw = db.getString().substring("recipeId:".length());
+            long id = Long.parseLong(idRaw);
+            Recipe recipe = findRecipeById(id);
+            LocalDate date = currentWeekStart.plusDays(dayOffset);
+            logic.onSetRecipeForSlot(date, mealType, recipe);
+            success = true;
         }
+        evt.setDropCompleted(success);
+        evt.consume();
     }
 
     private Recipe findRecipeById(long id) {
         for (Recipe recipe : recipes) {
-            if (recipe.id() != null && recipe.id() == id) {
+            if (recipe.id() == id) {
                 return recipe;
             }
         }
@@ -331,7 +305,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         updateSlotStyle(slot, items);
 
         slot.setOnMouseClicked(evt -> {
-            if (evt.getClickCount() == 2 && logic != null) {
+            if (evt.getClickCount() == 2) {
                 LocalDate date = currentWeekStart.plusDays(dayOffset);
                 logic.onSetRecipeForSlot(date, mealType, null);
             }
@@ -354,14 +328,10 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         imperial.setToggleGroup(unitToggleGroup);
 
         metric.setOnAction(evt -> {
-            if (logic != null) {
-                logic.onSelectMetric();
-            }
+            logic.onSelectMetric();
         });
         imperial.setOnAction(evt -> {
-            if (logic != null) {
-                logic.onSelectImperial();
-            }
+            logic.onSelectImperial();
         });
 
         groceryList.setPrefWidth(340);
@@ -376,10 +346,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
 
         Button addExtra = new Button("Add Extra");
         addExtra.setOnAction(evt -> {
-            if (logic == null) {
-                return;
-            }
-            String unit = extraUnit.getValue() == null ? "" : extraUnit.getValue();
+            String unit = extraUnit.getValue();
             logic.onAddExtraItem(extraName.getText(), extraAmount.getText(), unit);
         });
 
@@ -405,7 +372,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
     public void showWeek(LocalDate weekStart, Map<LocalDate, Map<MealType, List<Recipe>>> mealsByDay) {
         Platform.runLater(() -> {
             updatingWeek = true;
-            currentWeekStart = weekStart == null ? currentWeekStart : weekStart;
+            currentWeekStart = weekStart;
             updateWeekHeaderLabels(currentWeekStart);
 
             for (MealType type : MealType.values()) {
@@ -448,7 +415,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
 
     @Override
     public void showStatus(String message) {
-        Platform.runLater(() -> statusLabel.setText(message == null ? "" : message));
+        Platform.runLater(() -> statusLabel.setText(message));
     }
 
     @Override
@@ -472,12 +439,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
                 continue;
             }
             Ingredient ingredient = row.toIngredient();
-            if (ingredient != null) {
-                ingredients.add(ingredient);
-            }
-        }
-        if (ingredients.isEmpty()) {
-            throw new IllegalArgumentException("Add at least one ingredient.");
+            ingredients.add(ingredient);
         }
         return ingredients;
     }
@@ -502,31 +464,21 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         }
 
         private void setFromIngredient(Ingredient ingredient) {
-            if (ingredient == null) {
-                return;
-            }
             name.setText(ingredient.name());
             amount.setText(String.valueOf(ingredient.amount()));
             unit.getSelectionModel().select(ingredient.unit());
         }
 
         private Ingredient toIngredient() {
-            String ingredientName = name.getText() == null ? "" : name.getText().trim();
-            if (ingredientName.isBlank()) {
-                return null;
-            }
-            String amountRaw = amount.getText() == null ? "" : amount.getText().trim();
-            if (amountRaw.isBlank()) {
-                throw new IllegalArgumentException("Amount is required for ingredient: " + ingredientName);
-            }
-            double value = Double.parseDouble(amountRaw);
+            String ingredientName = name.getText().trim();
+            double value = Double.parseDouble(amount.getText().trim());
             String unitValue = unit.getValue();
             return new Ingredient(ingredientName, value, unitValue);
         }
     }
 
     private void updateRecipeButtons() {
-        boolean hasSelection = selectedRecipe != null && selectedRecipe.id() != null;
+        boolean hasSelection = selectedRecipe != null;
         addRecipeButton.setDisable(hasSelection);
         updateRecipeButton.setDisable(!hasSelection);
         deleteRecipeButton.setDisable(!hasSelection);
@@ -556,9 +508,6 @@ public class MealPlannerView extends BorderPane implements RenderPort {
                 return;
             }
             setOnDragDetected(evt -> {
-                if (item.id() == null) {
-                    return;
-                }
                 Dragboard db = startDragAndDrop(TransferMode.COPY);
                 ClipboardContent content = new ClipboardContent();
                 content.putString("recipeId:" + item.id());
@@ -576,13 +525,10 @@ public class MealPlannerView extends BorderPane implements RenderPort {
 
         private GroceryItemCell() {
             checkBox.selectedProperty().addListener((obs, wasSelected, isSelected) -> {
-                if (updating.get() || logic == null) {
+                if (updating.get()) {
                     return;
                 }
                 GroceryItem item = getItem();
-                if (item == null) {
-                    return;
-                }
                 Ingredient ingredient = item.ingredient();
                 logic.onSetBought(ingredient.name(), ingredient.unit(), isSelected);
             });

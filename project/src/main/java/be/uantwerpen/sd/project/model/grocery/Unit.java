@@ -51,10 +51,6 @@ enum Unit {
     }
 
     private static String normalizeUnit(String unit) {
-        if (unit == null) {
-            return "";
-        }
         return unit.trim().toLowerCase().replace('_', ' ').replaceAll("\\s+", " ");
     }
 }
-

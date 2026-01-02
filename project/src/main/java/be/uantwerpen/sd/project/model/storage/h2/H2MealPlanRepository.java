@@ -25,6 +25,7 @@ public class H2MealPlanRepository implements MealPlanRepository {
 
     @Override
     public MealPlan save(MealPlan plan) {
+        // upsert plan then rewrite all slot links
         try {
             Long existingId = findPlanIdByDate(plan.date());
             long planId = existingId == null ? insertPlan(plan.date()) : existingId;
@@ -121,6 +122,7 @@ public class H2MealPlanRepository implements MealPlanRepository {
     }
 
     private Map<MealType, List<Recipe>> getMealsForPlan(long mealPlanId) {
+        // load linked recipes per meal type
         Map<MealType, List<Recipe>> meals = new java.util.HashMap<>();
 
         String sql = "SELECT recipe_id, meal_type FROM meal_plan_recipes WHERE meal_plan_id = ?";

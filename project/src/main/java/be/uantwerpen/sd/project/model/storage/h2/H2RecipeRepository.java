@@ -21,6 +21,7 @@ public class H2RecipeRepository implements RecipeRepository {
 
     @Override
     public Recipe save(Recipe recipe) {
+        // insert recipe + tags + ingredients, then reload
         if (recipe.id() != null) {
             return update(recipe);
         }
@@ -66,6 +67,7 @@ public class H2RecipeRepository implements RecipeRepository {
     }
 
     private Recipe update(Recipe recipe) {
+        // update base row, then replace tags/ingredients
         try {
             String sql = "UPDATE recipes SET title = ?, description = ? WHERE id = ?";
             try (PreparedStatement stmt = connection.prepareStatement(sql)) {

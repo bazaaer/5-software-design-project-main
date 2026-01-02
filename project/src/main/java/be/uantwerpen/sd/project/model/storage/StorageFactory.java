@@ -1,20 +1,31 @@
 package be.uantwerpen.sd.project.model.storage;
 
 import be.uantwerpen.sd.project.model.storage.h2.H2StorageFactory;
+import be.uantwerpen.sd.project.model.storage.postgres.PostgresStorageFactory;
+import io.github.cdimascio.dotenv.Dotenv;
 
 public abstract class StorageFactory {
 
-    // The "Smart Switch" (Singleton/Factory Method)
-    private static StorageFactory instance;
+    private static volatile StorageFactory instance;
+    private static final Dotenv DOTENV = Dotenv.load();
 
-    public static synchronized StorageFactory getInstance() {
+    // Abstract Factory entry point + thread-safe singleton
+    public static StorageFactory getInstance() {
         if (instance == null) {
-            instance = H2StorageFactory.getInstance();
+            synchronized (StorageFactory.class) {
+                if (instance == null) {
+                    String dbType = DOTENV.get("DB_TYPE");
+                    if ("postgres".equals(dbType)) {
+                        instance = PostgresStorageFactory.getInstance();
+                    } else {
+                        instance = H2StorageFactory.getInstance();
+                    }
+                }
+            }
         }
         return instance;
     }
 
-    // The Abstract Method (What we produce)
     public abstract RecipeRepository getRecipeRepository();
 
     public abstract MealPlanRepository getMealPlanRepository();
