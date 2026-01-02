@@ -34,7 +34,7 @@ public class PostgresStorageFactory extends StorageFactory {
     }
 
     public static PostgresStorageFactory getInstance() {
-        // thread-safe singleton (double check)
+        // Thread-safe singleton (double check)
         if (instance == null) {
             synchronized (PostgresStorageFactory.class) {
                 if (instance == null) {

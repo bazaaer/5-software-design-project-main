@@ -11,7 +11,7 @@ public class ImperialGroceryListStrategy implements GroceryListStrategy {
 
     @Override
     public List<Ingredient> combine(List<Ingredient> ingredients) {
-        // Strategy impl: imperial merge + unit conversion
+        // Strategy implementation: imperial merge and unit conversion
         Map<Key, Accumulator> summed = new HashMap<>();
 
         for (Ingredient ingredient : ingredients) {

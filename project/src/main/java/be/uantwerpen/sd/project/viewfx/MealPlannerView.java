@@ -94,6 +94,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         this.logic = logic;
     }
 
+    // Builds the recipe list and form pane
     private VBox buildRecipesPane() {
         Label title = new Label("Recipes");
 
@@ -154,6 +155,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         return pane;
     }
 
+    // Builds the weekly planner pane and its header controls
     private VBox buildMealPlanPane() {
         Label title = new Label("Weekly Meal Plan");
 
@@ -188,6 +190,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         return pane;
     }
 
+    // Creates the 7-day grid with drop targets for each meal slot
     private GridPane buildWeekGrid() {
         GridPane grid = new GridPane();
         grid.setHgap(10);
@@ -276,6 +279,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         slot.setOnDragDropped(evt -> handleDrop(evt, slot, dayOffset, mealType));
     }
 
+    // Handles drag payload parsing and slot updates
     private void handleDrop(DragEvent evt, ListView<Recipe> slot, int dayOffset, MealType mealType) {
         boolean success = false;
         Dragboard db = evt.getDragboard();
@@ -321,6 +325,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
     }
 
     private VBox buildGroceryPane() {
+        // Builds the grocery list pane and unit toggle controls
         Label title = new Label("Grocery List");
 
         metric.setToggleGroup(unitToggleGroup);
@@ -423,6 +428,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         Platform.runLater(() -> new Alert(Alert.AlertType.ERROR, message).showAndWait());
     }
 
+    // Refreshes the day headers when the week changes
     private void updateWeekHeaderLabels(LocalDate weekStart) {
         DateTimeFormatter fmt = DateTimeFormatter.ofPattern("EEE dd/MM");
         for (int dayOffset = 0; dayOffset < dayHeaders.size(); dayOffset++) {
@@ -432,6 +438,7 @@ public class MealPlannerView extends BorderPane implements RenderPort {
         weekLabel.setText("Week of " + weekStart + " (Mon–Sun)");
     }
 
+    // Reads ingredient rows from the form into a list
     private List<Ingredient> collectIngredients() {
         List<Ingredient> ingredients = new ArrayList<>();
         for (javafx.scene.Node node : ingredientRowsBox.getChildren()) {

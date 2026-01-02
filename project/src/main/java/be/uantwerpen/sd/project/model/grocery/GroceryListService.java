@@ -39,6 +39,7 @@ public class GroceryListService {
     }
 
     public void setMealPlan(MealPlan mealPlan) {
+        // Updates week context and reloads stored grocery deltas
         LocalDate newWeekStart = weekStart(mealPlan);
         boolean weekChanged = !Objects.equals(currentWeekStart, newWeekStart);
         this.currentMealPlan = mealPlan;
@@ -55,7 +56,7 @@ public class GroceryListService {
     }
 
     public void setStrategy(GroceryListStrategy strategy) {
-        // Strategy swap
+        // Strategy switch
         this.strategy = strategy;
         recompute();
     }
@@ -77,6 +78,7 @@ public class GroceryListService {
     }
 
     public void setBought(String name, String unit, boolean bought) {
+        // Keeps the in-memory bought state and persists the delta
         Key key = Key.from(name, unit);
         if (bought) {
             boughtKeys.add(key);
@@ -96,7 +98,7 @@ public class GroceryListService {
     }
 
     private void recompute() {
-        // rebuild list + fire change if it actually changed
+        // Rebuild list and fire a change event only if it differs
         List<GroceryItem> oldList = this.groceryList;
         List<Ingredient> combined = strategy.combine(flattenIngredients(currentMealPlan, extraItems));
         List<GroceryItem> newList = combined.stream()
@@ -110,7 +112,7 @@ public class GroceryListService {
     }
 
     private static List<Ingredient> flattenIngredients(MealPlan plan, List<Ingredient> extras) {
-        // flatten all recipe ingredients + extras into one list
+        // Flatten recipe ingredients and extras into one list
         List<Ingredient> ingredients = new ArrayList<>();
         for (List<Recipe> recipes : plan.meals().values()) {
             for (Recipe recipe : recipes) {

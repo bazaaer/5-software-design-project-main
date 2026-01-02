@@ -8,6 +8,7 @@ final class H2Schema {
     private H2Schema() {
     }
 
+    // Creates core tables if they do not exist
     static void initialize(Connection connection) throws SQLException {
         try (Statement stmt = connection.createStatement()) {
             stmt.execute("CREATE TABLE IF NOT EXISTS recipes (" +

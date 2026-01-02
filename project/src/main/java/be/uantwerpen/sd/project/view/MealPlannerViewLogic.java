@@ -28,7 +28,7 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
         this.controller = controller;
         this.ui = ui;
 
-        // Observer: listen for grocery list updates
+        // Observer: listens for grocery list updates
         controller.addGroceryListListener(this);
 
         ui.showRecipes(controller.getAllRecipes());
@@ -37,6 +37,7 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
     }
 
     public void onWeekSelected(LocalDate anyDateInWeek) {
+        // Rebuilds the in-memory week snapshot and refreshes the UI
         weekStart = anyDateInWeek.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY));
 
         plannedWeek.clear();
@@ -61,6 +62,7 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
     }
 
     public void onUpdateRecipe(long id, String title, String description, String tagsRaw, List<Ingredient> ingredients) {
+        // Updates the recipe, then replaces references in the cached week
         String trimmedTitle = title.trim();
         String desc = description.trim();
         List<String> tags = parseTags(tagsRaw);
@@ -135,11 +137,12 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Observer hook for grocery list changes
+        // Observer callback for grocery list changes
         ui.showGroceryList(controller.getGroceryList());
     }
 
     private Map<LocalDate, Map<MealType, List<Recipe>>> snapshotWeek() {
+        // Converts the single-slot map into lists for rendering
         Map<LocalDate, Map<MealType, List<Recipe>>> snapshot = new HashMap<>();
         for (int i = 0; i < 7; i++) {
             LocalDate day = weekStart.plusDays(i);
@@ -159,6 +162,7 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
     }
 
     private MealPlan aggregateWeekMealPlan() {
+        // Merges all planned recipes into a single weekly plan
         Map<MealType, List<Recipe>> combined = new EnumMap<>(MealType.class);
         for (MealType type : MealType.values()) {
             combined.put(type, new ArrayList<>());
@@ -177,6 +181,7 @@ public final class MealPlannerViewLogic implements PropertyChangeListener {
     }
 
     private static Map<MealType, Recipe> normalizeMeals(Map<MealType, List<Recipe>> meals) {
+        // Normalizes each slot to a single recipe for the UI grid
         Map<MealType, Recipe> normalized = emptySlots();
         for (MealType type : MealType.values()) {
             List<Recipe> recipes = meals.getOrDefault(type, List.of());

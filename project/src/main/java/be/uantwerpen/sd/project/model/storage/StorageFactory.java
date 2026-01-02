@@ -9,7 +9,7 @@ public abstract class StorageFactory {
     private static volatile StorageFactory instance;
     private static final Dotenv DOTENV = Dotenv.load();
 
-    // Abstract Factory entry point + thread-safe singleton
+    // Abstract Factory entry point and thread-safe singleton
     public static StorageFactory getInstance() {
         if (instance == null) {
             synchronized (StorageFactory.class) {

@@ -18,7 +18,7 @@ public class H2StorageFactory extends StorageFactory {
     private GroceryDeltaRepository groceryDeltaRepository;
 
     // Abstract Factory: H2 concrete factory
-    // thread-safe singleton so this only gets built once
+    // Thread-safe singleton: only one instance
     private H2StorageFactory() {
         try {
             String url = DOTENV.get("H2_URL");
@@ -32,7 +32,7 @@ public class H2StorageFactory extends StorageFactory {
     }
 
     public static H2StorageFactory getInstance() {
-        // thread-safe singleton (double check)
+        // Thread-safe singleton (double check)
         if (instance == null) {
             synchronized (H2StorageFactory.class) {
                 if (instance == null) {

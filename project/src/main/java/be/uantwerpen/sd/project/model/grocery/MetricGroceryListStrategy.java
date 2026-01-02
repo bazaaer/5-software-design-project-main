@@ -11,7 +11,7 @@ public class MetricGroceryListStrategy implements GroceryListStrategy {
 
     @Override
     public List<Ingredient> combine(List<Ingredient> ingredients) {
-        // Strategy impl: metric merge + unit conversion
+        // Strategy implementation: metric merge and unit conversion
         Map<Key, Accumulator> summed = new HashMap<>();
 
         for (Ingredient ingredient : ingredients) {
