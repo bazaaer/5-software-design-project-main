@@ -35,16 +35,8 @@ replay_pid*
 .classpath
 .settings/
 
-# OS
-.DS_Store
-
-# Misc
-*.swp
-**/.m2-autograder/
-
-# Database
+# Database files
 *.db
 *.mv.db
 *.trace.db
-lab5/*
 
